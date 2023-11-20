@@ -23,6 +23,7 @@ final class ViewController: UIViewController {
         button.setTitle("Generate", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .systemBlue
+        button.addTarget(self, action: #selector(didTapDutton), for: .touchUpInside)
         return button
     }()
         
@@ -36,11 +37,13 @@ final class ViewController: UIViewController {
     
     //MARK: - Setup Constraints
     private func setupConstraints() {
-        imageView.snp.makeConstraints {make in
+        imageView.snp.makeConstraints { make in
             make.centerX.centerY.equalToSuperview()
-            make.width.equalToSuperview()
+            make.leading.equalToSuperview().offset(16)
+            make.trailing.equalToSuperview().offset(-16)
             make.height.equalToSuperview().multipliedBy(0.5)
         }
+
         
         generateImageButton.snp.makeConstraints {make in
             make.height.equalTo(50)
@@ -55,6 +58,7 @@ final class ViewController: UIViewController {
         super.viewDidLoad()
         setupView()
         setupConstraints()
+        getRandomImage()
         
         view.backgroundColor = .white
     }
@@ -66,6 +70,27 @@ final class ViewController: UIViewController {
     }
     
     //MARK: - Actions
+    private func getRandomImage() {
+        let urlString = "https://source.unsplash.com/random/600x600"
+        let url = URL(string: urlString)!
+        
+        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+            guard let data = data, error == nil else {
+                print("Failed to download image: \(error?.localizedDescription ?? "Error")")
+                return
+            }
 
+            DispatchQueue.main.async {
+                self.imageView.contentMode = .scaleAspectFill
+                self.imageView.clipsToBounds = true
+                self.imageView.image = UIImage(data: data)
+            }
+        }
+        task.resume()
+    }
+    
+    @objc private func didTapDutton() {
+        getRandomImage()
+    }
 }
 
